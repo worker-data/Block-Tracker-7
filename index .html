@@ -1,0 +1,880 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BLOCK TRACKER</title><style>
+:root{--navy:#263c54;--green:#24766b;--bg:#f1f4f7;--line:#dce3e9}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#243345;font:15px/1.65 -apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic',sans-serif}main{max-width:780px;margin:auto;padding:20px 16px 60px}header{padding:22px 0 18px}h1{font-size:29px;letter-spacing:2px;margin:0;line-height:1.15}h2{font-size:19px;margin:0 0 14px}h3{font-size:16px;margin:0 0 12px}p{margin:6px 0}small,.muted{color:#657585;font-size:12px}.brand{display:flex;gap:14px;align-items:center}.logo{background:var(--navy);color:white;border-radius:14px;padding:12px;font-size:26px}nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}button,.file{font:inherit;cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:11px 15px;background:white;color:var(--navy);font-weight:600}nav button{font-size:13px;padding:12px 4px}button.active,button.primary{background:var(--navy);color:white;border-color:var(--navy)}button:disabled{opacity:.5;cursor:not-allowed}.card{background:white;border:1px solid var(--line);border-radius:14px;padding:19px;margin-bottom:14px}.section{border-top:1px solid var(--line);padding-top:18px;margin-top:18px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}input:not([type=checkbox]):not([type=range]),select,textarea{font:inherit;font-size:16px;width:100%;min-width:0;padding:10px;border:1px solid #cbd5df;border-radius:8px;background:#fff;color:inherit}textarea{resize:vertical;min-height:75px}input[type=range]{width:100%;accent-color:var(--green)}input[type=checkbox]{width:19px;height:19px;accent-color:var(--green)}.check{display:flex;align-items:center;gap:9px;padding:6px 0}.metric{padding:13px;background:#f3f6f8;border-radius:10px;min-width:0}.metric small{display:block}.metric strong{font-size:25px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.bad{color:#a24435}.good{color:var(--green)}.full{width:100%}.notice{background:#e9f1f5;border-radius:8px;padding:10px 13px;margin-bottom:14px;font-size:13px}.warn{background:#fff4e7}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;white-space:nowrap;font-size:13px}td,th{padding:9px;border-bottom:1px solid var(--line);text-align:left}th{background:#f1f4f7}.chart{margin:15px 0}.chart svg{width:100%;height:auto;display:block}.legend{display:flex;gap:14px;justify-content:center;font-size:12px}.dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}.hidden,[hidden]{display:none!important}.status{font-size:13px;color:var(--green);min-height:20px}.entry{border-top:1px solid var(--line);padding:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}footer{text-align:center;font-size:12px;color:#657585;margin:24px 0} @media(max-width:400px){main{padding:12px 10px 40px}.card{padding:14px}.grid{gap:8px}.metric strong{font-size:21px}h1{font-size:24px}nav button{font-size:11px}} @media(prefers-reduced-motion:no-preference){button:hover{filter:brightness(.96)}}
+
+/* Presentation-only refinement */
+:root{--navy:#20394d;--green:#176c60;--bg:#f3f6f7;--line:#dce5e8;--ink:#203448}
+body{color:var(--ink);font-size:15px;line-height:1.7;background:linear-gradient(180deg,#e8eff2 0,#f3f6f7 320px)}
+main{max-width:1000px;padding:28px 24px 60px}
+header{padding:27px 30px;margin-bottom:17px;border-radius:20px;background:linear-gradient(120deg,#20394d,#264f60);color:white;box-shadow:0 8px 24px #20394d16}
+header .brand{gap:17px}header .logo{background:#ffffff18;border:1px solid #ffffff35;border-radius:15px;width:57px;height:57px;display:grid;place-items:center;padding:0}header h1{font-size:30px;letter-spacing:2.2px}header p{color:#e5eff2;margin:5px 0 0}header small{color:#c1d5dd;font-size:12px}
+#storage{background:#e5f1ed;color:#245d53;border:1px solid #c7e1d8;border-radius:10px;padding:9px 15px;margin-bottom:14px}#storage.warn{background:#fff4e7;color:#874d16;border-color:#efd6b6}
+nav{background:white;border:1px solid var(--line);padding:5px;gap:5px;border-radius:13px;box-shadow:0 3px 12px #20394d06;margin-bottom:12px}nav button{border:0;border-radius:9px;font-size:14px;min-height:46px;color:#506375}nav button.active{background:var(--navy);color:#fff;box-shadow:0 2px 5px #20394d22}
+.card{border-radius:18px;padding:27px 30px;margin-bottom:20px;box-shadow:0 4px 18px #20394d08}
+h2{font-size:23px;letter-spacing:.02em;margin-bottom:4px}h3{font-size:17px;letter-spacing:.02em;margin-bottom:20px}h4{font-size:14px;color:var(--green);margin:26px 0 13px;padding:0 0 0 10px;border-left:3px solid #72ab9e;line-height:1.4}
+.section{margin-top:27px;padding-top:24px;border-color:var(--line)}#recordForm>.section>h3{background:#edf3f5;color:var(--navy);border-radius:9px;padding:12px 15px;margin-bottom:20px}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 22px;align-items:start}.field{min-width:0}.field label{font-size:14px;color:#344c5d;margin-bottom:7px;font-weight:650}.field small{display:block;margin-top:5px;line-height:1.5;color:#586b7b}
+input:not([type=checkbox]):not([type=range]),select,textarea{border:1px solid #cbd7dd;background:#fcfdfe;border-radius:9px;min-height:46px;padding:10px 12px;transition:border-color .15s,box-shadow .15s}input:focus,select:focus,textarea:focus{outline:2px solid #258478;outline-offset:1px;border-color:#258478}input::placeholder,textarea::placeholder{color:#81909b}textarea{min-height:96px}
+#work+.field,#results+.field{padding:14px 17px;margin-top:17px;background:#edf6f3;border:1px solid #d2e6de;border-radius:11px}output#actualOutput,output#breakOutput,output#completedOutput{display:block;color:var(--green);font-weight:750;font-size:25px;font-variant-numeric:tabular-nums;line-height:1.4}
+#live,#metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric{background:#f5f8f9;border:1px solid #dfe8eb;border-radius:11px;padding:15px 14px;min-height:91px}.metric small{font-size:12px;color:#526775;line-height:1.55}.metric strong{display:block;margin-top:4px;font-size:24px;line-height:1.3;letter-spacing:-.025em}.metric:has(.good){border-color:#cde3dc}.chart{border-radius:12px;background:#fff;margin:20px 0}.legend{flex-wrap:wrap}
+button,.file{border-radius:10px;min-height:44px}button:focus-visible,.file:focus-visible{outline:3px solid #258478;outline-offset:2px}button.primary{background:var(--green);border-color:var(--green);padding:14px 16px;box-shadow:0 3px 8px #176c601c}#saveRecord{margin-top:18px}#cancelEdit{margin-top:9px}#ideas .field{margin-bottom:20px}#manage input[type=file]{margin:7px 0 17px}table th{background:#eaf0f3}td,th{padding:12px}footer{color:#596c7b}.scroll{border-radius:9px}
+@media(max-width:680px){main{padding:15px 13px 40px}header{padding:21px 17px;border-radius:15px}header h1{font-size:24px}header .logo{width:44px;height:44px;font-size:21px}header .brand{gap:11px}.card{padding:19px 16px;border-radius:14px}.grid{gap:15px 12px}#live,#metrics{grid-template-columns:repeat(2,minmax(0,1fr))}nav button{font-size:12px;padding:9px 3px}h2{font-size:20px}.metric strong{font-size:21px}}
+@media(max-width:480px){#basic,#work{grid-template-columns:1fr}#after,#results,#travel{grid-template-columns:repeat(2,minmax(0,1fr))}.field label{font-size:13px}header p{font-size:12px}#recordForm>.section>h3{font-size:15px;padding:10px 12px}.metric{padding:12px 10px}nav{gap:2px;padding:4px}nav button{font-size:11px}}
+@media(prefers-reduced-motion:reduce){input,select,textarea{transition:none}}
+
+.time-hint{display:inline-block;margin-left:8px;color:#176c60;font-weight:700;background:#e7f3ee;border-radius:6px;padding:1px 8px}#record .muted strong{color:#a14427}@media(max-width:480px){.time-hint{margin-left:0;margin-top:5px}}
+
+/* V2.58 — welcoming, low-friction form styling; visual changes only */
+:root{--navy:#20394d;--green:#176c60;--bg:#f3f6f7;--line:#dce5e8;--ink:#203448}
+body{background:var(--bg);color:var(--ink)}
+main{max-width:1010px}
+header{background:linear-gradient(120deg,#20394d,#264f60);border:0;box-shadow:0 8px 24px #20394d16}
+header .logo{background:#ffffff1c;border:1px solid #ffffff55;box-shadow:inset 0 1px 2px #ffffff30}
+nav{position:relative;box-shadow:0 7px 28px #22394a0b}
+nav button{transition:background .18s,color .18s,transform .18s}
+nav button.active{background:#176f66;box-shadow:0 3px 9px #14645825}
+nav button:hover:not(.active){background:#edf6f2;filter:none}
+.card{border:1px solid #e0e9e7;box-shadow:0 7px 28px #20493f0b;background:#fff}
+#record>h2{font-size:25px;margin-bottom:3px;letter-spacing:.01em}
+#record>p.muted{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:5px 0 5px;font-size:13px}
+#record>p.muted strong{font-weight:700;color:#99502e}
+.time-hint{margin-left:auto;background:#e5f4ec;border:1px solid #c8e8db;color:#20725c;border-radius:999px;padding:3px 12px;font-size:12px}
+#recordForm>.section{border-top:0;margin-top:23px;padding:23px 22px 22px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 6px #213f4104}
+#recordForm>.section:first-child{margin-top:23px}
+#recordForm>.section>h3{margin:-23px -22px 22px;padding:15px 20px;background:#f3f6f8;border:0;border-bottom:1px solid var(--line);border-radius:16px 16px 0 0;color:var(--navy);font-size:17px;letter-spacing:.02em}
+#recordForm>.section:nth-of-type(2)>h3{background:#f3f6f8;color:var(--navy);border-bottom-color:var(--line)}
+#recordForm>.section:nth-of-type(3)>h3{background:#f3f6f8;color:var(--navy);border-bottom-color:var(--line)}
+#recordForm h4{font-size:14px;color:#3b6470;border-left:0;margin:23px 0 14px;padding:0 0 9px;border-bottom:1px solid #e1eae8;font-weight:750}
+#recordForm h4::before{content:'';display:inline-block;width:7px;height:7px;background:#6aa994;border-radius:50%;vertical-align:middle;margin-right:9px;transform:translateY(-1px)}
+.field label{color:#314b54;font-size:13px;font-weight:700;margin-bottom:7px}
+.field small{font-size:12px;color:#70818b}
+input:not([type=checkbox]):not([type=range]),select,textarea{background:white;border-color:#cfddd9;border-radius:11px;box-shadow:0 1px 2px #243b4005}
+input:not([type=checkbox]):not([type=range]):hover,select:hover,textarea:hover{border-color:#9cbbb2}
+input:not([type=checkbox]):not([type=range]):focus,select:focus,textarea:focus{border-color:#239181;outline:2px solid #6ec6b54a;outline-offset:0;box-shadow:0 0 0 3px #6ec6b524;background:white}
+input:disabled{background:#edf3f2;color:#637874}
+#work+.field,#results+.field{background:#eff9f3;border-color:#cbe5d6}
+output#actualOutput,output#breakOutput,output#completedOutput{color:#157a6b}
+#live .metric{background:#f3f6f8;border-color:var(--line);min-height:100px;padding:16px}
+#live .metric strong{color:#205d51}
+#metrics .metric{background:#f3f6f8}
+#saveRecord{min-height:54px;border-radius:12px;box-shadow:0 5px 14px #157a6b32;font-size:16px;letter-spacing:.025em;transition:transform .15s,box-shadow .15s}
+#saveRecord:hover{transform:translateY(-1px);box-shadow:0 8px 17px #157a6b3c;filter:none}
+#saveRecord:active{transform:translateY(0)}
+#storage{border-radius:12px}
+#status:not(:empty){margin:7px 0 12px}
+#ideas .card,#dashboard .card,#manage .card{border-color:#e0e9e7}
+@media(max-width:680px){#recordForm>.section{margin-top:17px;padding:18px 14px}#recordForm>.section>h3{margin:-18px -14px 18px;padding:13px 14px;font-size:15px}#record>h2{font-size:21px}.time-hint{margin-left:0}}
+@media(max-width:480px){#after,#results,#travel{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 11px}#basic,#work{grid-template-columns:1fr}#recordForm h4{margin:20px 0 12px}#live .metric{min-height:85px;padding:12px 10px}#live .metric strong{font-size:20px}nav button{font-size:11px}header h1{letter-spacing:1px}}
+@media(prefers-reduced-motion:reduce){nav button,#saveRecord{transition:none}}
+
+
+/* Keep automatic-analysis and dashboard metric labels on one line. */
+#live .metric small, #metrics .metric small {white-space:nowrap;overflow:visible;font-size:11px;letter-spacing:-.025em;}
+@media (max-width:480px) {#live,#metrics {grid-template-columns:1fr;} #live .metric small,#metrics .metric small{font-size:12px;}}
+/* Explanation split into two lines on wider screens, wraps naturally on phones. */
+#recordForm .explanation-two-lines{font-size:11px;line-height:1.55;letter-spacing:-.02em}
+#recordForm .explanation-two-lines .note-line{display:block}
+@media(min-width:900px){#recordForm .explanation-two-lines{white-space:nowrap}}
+@media(max-width:899px){#recordForm .explanation-two-lines{font-size:12px;overflow-wrap:anywhere}}
+
+/* V2.67: cohesive slate / ocean / evergreen palette for all analysis cards. */
+#live .metric{background:#f5f7f9;border:1px solid #dfe6eb;border-left:3px solid #b6c5d0;border-radius:11px;box-shadow:none;transition:background .15s ease}
+#live .metric strong{color:#344b5f}
+/* Pay indicators: related hues within one cool palette, not competing colors. */
+#live .metric:nth-child(1){border-left-color:#879bad}
+#live .metric:nth-child(1) strong{color:#50677b}
+#live .metric:nth-child(2){border-left-color:#547d95}
+#live .metric:nth-child(2) strong{color:#315e78}
+#live .metric:nth-child(3){border-left-color:#4a8778}
+#live .metric:nth-child(3) strong{color:#286b5d}
+#live .metric:nth-child(4){border-left-color:#789b9c}
+#live .metric:nth-child(4) strong{color:#3e7477}
+/* Workload, time and exception indicators remain visually quieter. */
+#live .metric:nth-child(n+5){border-left-color:#b6c5d0}
+#live .metric:nth-child(n+5) strong{color:#344b5f}
+#live .metric:nth-child(7){border-left-color:#7c97a5}
+#live .metric:nth-child(7) strong{color:#42677a}
+
+/* V2.68: end-time difference: late=muted red, early=muted green, on-time=slate. */
+#live .metric:nth-child(7) strong.end-late,#metrics .metric strong.end-late{color:#b45353}
+#live .metric:nth-child(7) strong.end-early,#metrics .metric strong.end-early{color:#32836b}
+#live .metric:nth-child(7) strong.end-neutral,#metrics .metric strong.end-neutral{color:#647586}
+
+/* V2.69 — consistent reward numerals, meaningful differences only. */
+#live .metric:nth-child(-n+4) strong{color:#315e78}
+#live .metric:nth-child(-n+4){border-left-color:#7892a2}
+#live .metric:nth-child(7) strong.end-late,#metrics .metric strong.end-late{color:#b45353}
+#live .metric:nth-child(7) strong.end-early,#metrics .metric strong.end-early{color:#32836b}
+#live .metric:nth-child(7) strong.end-neutral,#metrics .metric strong.end-neutral{color:#647586}
+
+/* Mobile-first finishing layer — presentation only, leaves IDs and scripts intact. */
+html{-webkit-text-size-adjust:100%;scroll-padding-top:78px}
+body{overflow-x:hidden}
+button,input,select,textarea{touch-action:manipulation}
+button:focus-visible,a:focus-visible{outline:3px solid #7cc7b8;outline-offset:3px}
+@media(max-width:640px){
+  body{font-size:15px;line-height:1.65;background:#f3f6f7}
+  main{width:100%;max-width:100%;margin:0;padding:10px 12px calc(30px + env(safe-area-inset-bottom,0px))}
+  header{padding:17px 17px 16px;margin:0 0 11px;border-radius:15px;box-shadow:0 4px 12px #20394d14}
+  header .brand{align-items:center;gap:12px}
+  header .logo{width:43px;height:43px;min-width:43px;border-radius:12px;font-size:21px}
+  header h1{font-size:24px;line-height:1.15;letter-spacing:.9px}
+  header p{font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+  header small{font-size:11px}
+  nav{position:sticky;top:0;z-index:15;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:0 -2px 13px;padding:7px 3px;background:#f3f6f7ed;border-radius:12px;box-shadow:0 4px 10px #20394d08;backdrop-filter:blur(8px)}
+  nav button{min-width:0;min-height:46px;padding:9px 2px;border-radius:10px;font-size:clamp(10px,2.85vw,13px);font-weight:700;line-height:1.25;white-space:normal;word-break:keep-all}
+  #storage{margin-bottom:12px;padding:10px 12px;font-size:12px;line-height:1.5}
+  .card{padding:17px 14px;border-radius:14px;margin-bottom:12px;box-shadow:0 3px 12px #19394a08}
+  #record>h2,#dashboard h2,#ideas h2,#manage h2{font-size:20px;line-height:1.35;margin-bottom:10px}
+  #record>p.muted{font-size:12px;line-height:1.6;margin-bottom:13px}
+  #recordForm>.section{margin-top:15px;padding:15px 12px 17px;border-radius:13px}
+  #recordForm>.section:first-child{margin-top:15px}
+  #recordForm>.section>h3{margin:-15px -12px 18px;padding:12px 13px;font-size:15px;line-height:1.4;letter-spacing:0}
+  #recordForm h4{font-size:14px;margin:20px 0 12px;padding-bottom:8px}
+  .grid,#basic,#work,#after,#results,#travel{gap:13px 11px}
+  #basic,#work{grid-template-columns:1fr}
+  #after,#results,#travel{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #basic .field,#work .field,#after .field,#results .field,#travel .field{min-width:0}
+  .field label{font-size:13px;line-height:1.45;margin-bottom:7px;overflow-wrap:anywhere}
+  .field small,.field>small{display:block;font-size:11.5px;line-height:1.45;margin-top:5px}
+  input:not([type=checkbox]):not([type=range]),select,textarea{width:100%;min-width:0;min-height:48px;font-size:16px;padding:11px 12px;border-radius:10px}
+  input[type=date],input[type=datetime-local],input[type=time]{display:block;max-width:100%;-webkit-appearance:none;appearance:auto}
+  textarea{min-height:105px;line-height:1.55}
+  button,.file{min-height:46px}
+  #saveRecord{min-height:54px;width:100%;font-size:16px}
+  .actions{gap:9px}
+  .actions button,.actions .file{flex-grow:1;min-width:0}
+  #live,#metrics{grid-template-columns:1fr!important;gap:9px}
+  #live .metric,#metrics .metric{min-height:unset;padding:13px 14px;border-radius:11px}
+  #live .metric small,#metrics .metric small{font-size:12px;line-height:1.45;letter-spacing:0;white-space:normal;overflow-wrap:anywhere}
+  #live .metric strong,#metrics .metric strong{font-size:23px;line-height:1.45;overflow-wrap:anywhere}
+  .metric strong{font-variant-numeric:tabular-nums}
+  #recordForm .explanation-two-lines{font-size:11.5px;white-space:normal;line-height:1.55}
+  #recordForm .explanation-two-lines .note-line{display:block}
+  #actualOutput{font-size:19px;line-height:1.5}
+  #ideaForm .grid{grid-template-columns:1fr}
+  .scroll{max-width:100%;-webkit-overflow-scrolling:touch}
+  table{font-size:12px}
+  td,th{padding:10px 8px}
+  footer{font-size:11px;line-height:1.6;padding:0 8px}
+  .time-hint{margin-top:7px;margin-left:0;font-size:11px;padding:3px 9px}
+}
+@media(max-width:370px){
+  main{padding-left:9px;padding-right:9px}
+  .card{padding:15px 11px}
+  #after,#results,#travel{grid-template-columns:1fr}
+  nav button{font-size:10px;padding:7px 1px}
+  #recordForm>.section{padding-left:11px;padding-right:11px}
+  #recordForm>.section>h3{margin-left:-11px;margin-right:-11px}
+}
+@media(min-width:641px) and (max-width:850px){
+  main{padding:22px 18px 48px}
+  #live,#metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #live .metric small,#metrics .metric small{white-space:normal;overflow-wrap:anywhere}
+}
+
+
+/* Mobile: three-column automatic-analysis cards only; Dashboard unchanged. */
+@media (max-width:640px){
+  #live{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+  #live .metric{min-width:0;min-height:100px;padding:10px 6px!important}
+  #live .metric small{display:block;font-size:clamp(9px,2.45vw,11px)!important;line-height:1.35;white-space:normal!important;overflow-wrap:anywhere;word-break:normal}
+  #live .metric strong{font-size:clamp(13px,3.6vw,19px)!important;line-height:1.3;overflow-wrap:anywhere}
+}
+@media (max-width:360px){#live{gap:5px!important}#live .metric{padding:8px 4px!important;min-height:96px}}
+
+/* FINAL: 03 自動分析 = exactly 3 columns × 3 rows, including on phones. */
+#recordForm #live.grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-auto-flow: row !important;
+  gap: 8px !important;
+  width: 100%;
+}
+#recordForm #live > .metric {
+  min-width: 0 !important;
+  margin: 0;
+  padding: 11px 8px !important;
+  min-height: 112px !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+#recordForm #live > .metric small {
+  display: block;
+  min-width: 0;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+  white-space: normal !important;
+}
+#recordForm #live > .metric strong {
+  display: block;
+  min-width: 0;
+  font-size: clamp(13px, 3.7vw, 21px) !important;
+  letter-spacing: -0.04em;
+  line-height: 1.3 !important;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+@media(max-width:390px) {
+  #recordForm #live.grid {gap: 5px !important;}
+  #recordForm #live > .metric {padding: 9px 5px !important; min-height: 114px !important;}
+  #recordForm #live > .metric small {font-size: 10px !important;}
+  #recordForm #live > .metric strong {font-size: 13px !important;}
+}
+
+/* My Data: 3 columns, 4 rows (11 indicators; last slot left empty). */
+#dashboard #metrics.grid {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  grid-auto-flow:row !important;
+  gap:8px !important;
+}
+#dashboard #metrics > .metric {
+  min-width:0 !important;
+  min-height:105px !important;
+  padding:11px 8px !important;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+#dashboard #metrics > .metric small {
+  min-width:0;
+  display:block;
+  white-space:normal !important;
+  overflow-wrap:anywhere;
+  line-height:1.35 !important;
+  font-size:11px !important;
+  letter-spacing:-.025em;
+}
+#dashboard #metrics > .metric strong {
+  min-width:0;
+  display:block;
+  font-size:clamp(13px,3.65vw,21px) !important;
+  line-height:1.3 !important;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media(max-width:390px){
+  #dashboard #metrics.grid{gap:5px !important}
+  #dashboard #metrics > .metric{padding:9px 5px !important;min-height:110px !important}
+  #dashboard #metrics > .metric small{font-size:10px !important}
+  #dashboard #metrics > .metric strong{font-size:13px !important}
+}
+
+/* My Data: 3 columns x 4 rows on mobile; 11 indicators. */
+#dashboard #metrics.grid {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  grid-template-rows:repeat(4,minmax(106px,auto)) !important;
+  grid-auto-flow:row !important;
+  gap:8px !important;
+}
+#dashboard #metrics.grid::after { content:none !important; display:none !important; }
+#dashboard #metrics > .metric {
+  min-width:0 !important;
+  padding:10px 7px !important;
+  min-height:106px !important;
+}
+#dashboard #metrics > .metric small {
+  font-size:clamp(10px,2.4vw,12px) !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+  line-height:1.35 !important;
+}
+#dashboard #metrics > .metric strong {
+  font-size:clamp(13px,3.2vw,19px) !important;
+  overflow-wrap:anywhere !important;
+  line-height:1.25 !important;
+}
+@media(max-width:390px) {
+  #dashboard #metrics.grid { gap:5px !important; }
+  #dashboard #metrics > .metric {padding:9px 5px !important;}
+}
+
+/* Mobile My Data: two columns. Automatic Analysis remains three columns. */
+@media (max-width:640px) {
+  #dashboard #metrics.grid {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    grid-template-rows:none !important;
+    grid-auto-rows:minmax(100px,auto) !important;
+    gap:10px !important;
+  }
+  #dashboard #metrics > .metric {
+    min-height:100px !important;
+    padding:13px 12px !important;
+  }
+  #dashboard #metrics > .metric small {
+    font-size:12px !important;
+    line-height:1.4 !important;
+  }
+  #dashboard #metrics > .metric strong {
+    font-size:clamp(17px,4.5vw,23px) !important;
+    line-height:1.25 !important;
+  }
+}
+
+/* Mobile: both 03 Auto Analysis and My Data use two columns. */
+@media (max-width: 640px) {
+  #record #live.grid {
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    grid-template-rows:none !important;
+    grid-auto-flow:row !important;
+    gap:10px !important;
+  }
+  #record #live > .metric { min-width:0 !important; min-height:96px !important; padding:12px 10px !important; }
+  #record #live > .metric small {font-size:12px !important;overflow-wrap:anywhere !important;white-space:normal !important;}
+  #record #live > .metric strong {font-size:clamp(17px,4.5vw,23px) !important;}
+}
+
+/* FINAL RESPONSIVE OVERRIDE: BOTH data card sections ALWAYS 2 columns. */
+#record #live.grid,
+#recordForm #live.grid,
+#dashboard #metrics.grid {
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-template-rows:none !important;
+  grid-auto-flow:row !important;
+  gap:10px !important;
+  width:100% !important;
+}
+#record #live.grid > .metric,
+#dashboard #metrics.grid > .metric {
+  width:auto !important;
+  min-width:0 !important;
+  min-height:105px !important;
+  padding:12px 10px !important;
+}
+#record #live.grid > .metric small,
+#dashboard #metrics.grid > .metric small {
+  display:block !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+  font-size:clamp(11px,2.8vw,13px) !important;
+  line-height:1.4 !important;
+}
+#record #live.grid > .metric strong,
+#dashboard #metrics.grid > .metric strong {
+  display:block !important;
+  font-size:clamp(17px,4.4vw,24px) !important;
+  overflow-wrap:anywhere !important;
+}
+
+
+/* 天候・交通状況はコンパクトな単一行入力欄 */
+
+/* Dashboard overtime note — compact within the existing metric card */
+#dashboard .overtime-detail{display:block;margin-top:7px;font-size:11px;font-weight:400;line-height:1.5;color:#607181;overflow-wrap:anywhere;white-space:normal}
+
+/* Screenshot-inspired minimal layout: ONLY section 03 auto analysis */
+#record #live.grid,
+#recordForm #live.grid {
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-template-rows:none !important;
+  grid-auto-flow:row !important;
+  gap:0 !important;
+  background:#fff !important;
+}
+#record #live > .metric,
+#recordForm #live > .metric {
+  background:#fff !important;
+  background-image:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  min-width:0 !important;
+  min-height:115px !important;
+  padding:20px 12px 24px !important;
+  margin:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:flex-start !important;
+}
+#record #live > .metric small,
+#recordForm #live > .metric small {
+  color:#757b80 !important;
+  font-size:clamp(12px,3.3vw,15px) !important;
+  font-weight:400 !important;
+  line-height:1.45 !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+#record #live > .metric strong,
+#recordForm #live > .metric strong {
+  color:#111820 !important;
+  font-size:clamp(22px,5.6vw,33px) !important;
+  font-weight:700 !important;
+  line-height:1.2 !important;
+  letter-spacing:-.02em !important;
+  margin-top:15px !important;
+  overflow-wrap:anywhere !important;
+}
+/* Preserve the meaningful earlier/later sign colors. */
+#record #live > .metric strong.end-late,
+#recordForm #live > .metric strong.end-late { color:#b45353 !important; }
+#record #live > .metric strong.end-early,
+#recordForm #live > .metric strong.end-early { color:#32836b !important; }
+#record #live > .metric strong.end-neutral,
+#recordForm #live > .metric strong.end-neutral { color:#647586 !important; }
+@media(max-width:380px){
+  #record #live > .metric,
+  #recordForm #live > .metric {padding:17px 8px 20px !important;min-height:108px !important;}
+}
+
+/* Screenshot-inspired minimal metrics: My Dashboard only. */
+#dashboard #metrics.grid {
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-template-rows:none !important;
+  grid-auto-flow:row !important;
+  gap:0 !important;
+  background:#fff !important;
+}
+#dashboard #metrics > .metric {
+  background:#fff !important;
+  background-image:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  min-width:0 !important;
+  min-height:115px !important;
+  padding:20px 12px 24px !important;
+  margin:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:flex-start !important;
+}
+#dashboard #metrics > .metric small {
+  color:#757b80 !important;
+  font-size:clamp(12px,3.3vw,15px) !important;
+  font-weight:400 !important;
+  line-height:1.45 !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+#dashboard #metrics > .metric strong {
+  color:#111820 !important;
+  font-size:clamp(22px,5.6vw,33px) !important;
+  font-weight:700 !important;
+  line-height:1.2 !important;
+  letter-spacing:-.02em !important;
+  margin-top:15px !important;
+  overflow-wrap:anywhere !important;
+}
+#dashboard #metrics > .metric strong.end-late { color:#b45353 !important; }
+#dashboard #metrics > .metric strong.end-early { color:#32836b !important; }
+#dashboard #metrics > .metric strong.end-neutral { color:#647586 !important; }
+#dashboard #metrics .overtime-detail {color:#757b80 !important; font-size:11px !important; line-height:1.45 !important;}
+@media(max-width:380px){
+  #dashboard #metrics > .metric{padding:17px 8px 20px !important;min-height:108px !important;}
+}
+
+
+/* Field notes: clean four-field editor, consistent spacing, no optional marks. */
+#ideas .note-editor{padding:27px 30px}
+#ideas .note-editor h2{margin:0 0 7px}
+#ideas .note-intro{font-size:13px;line-height:1.7;margin:0 0 23px;max-width:660px;color:#657585}
+#ideas #ideaForm .note-selector{margin:0 0 22px;padding:0 0 22px;border-bottom:1px solid var(--line)}
+#ideas #ideaForm .note-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:21px 18px;margin:0 0 25px}
+#ideas #ideaForm .note-fields .field{margin:0;min-width:0}
+#ideas #ideaForm label{display:block;margin:0 0 8px;font-size:13px;line-height:1.45;font-weight:650}
+#ideas #ideaForm .note-fields textarea{display:block;width:100%;min-height:124px;resize:vertical;padding:12px 13px;border:1px solid #d7e0e5;border-radius:10px;background:#fff;line-height:1.65}
+#ideas #ideaForm textarea::placeholder{font-size:13px;color:#9aa6af}
+#ideas #ideaForm button[type=submit]{min-height:50px;box-shadow:none}
+#ideas .note-history h3{margin-bottom:14px}
+@media(max-width:680px){
+ #ideas .note-editor{padding:20px 16px}
+ #ideas .note-intro{font-size:12px;margin-bottom:19px}
+ #ideas #ideaForm .note-selector{margin-bottom:19px;padding-bottom:19px}
+ #ideas #ideaForm .note-fields{grid-template-columns:minmax(0,1fr);gap:16px;margin-bottom:21px}
+ #ideas #ideaForm .note-fields textarea{min-height:100px}
+}
+
+/* Labels are unit-free; units sit beside the numeric result only. */
+#live .metric strong .value-unit,
+#dashboard #metrics .metric strong .value-unit{
+ font-size:.53em !important;font-weight:500 !important;color:#747e87 !important;
+ letter-spacing:0 !important;white-space:nowrap !important;vertical-align:baseline;
+}
+
+/* Hourly-rate gap: explicit signed colors override the minimal black numbers. */
+#record #live > .metric strong.bad,
+#recordForm #live > .metric strong.bad,
+#dashboard #metrics > .metric strong.bad { color:#c24141 !important; }
+#record #live > .metric strong.good,
+#recordForm #live > .metric strong.good,
+#dashboard #metrics > .metric strong.good { color:#21835e !important; }
+
+/* Traffic question: compact select, optional free response */
+#trafficOther[hidden]{display:none!important}
+#trafficOther{margin-top:8px}
+.traffic-help{display:block;margin:0 0 6px;color:#657585;font-weight:400;line-height:1.5}
+
+/* Field notes: compact questionnaire and free writing */
+#ideas .note-survey{display:grid;gap:18px;margin:0 0 22px}
+#ideas .survey-fieldset{min-width:0;margin:0;padding:18px 18px 17px;border:1px solid #dce4e8;border-radius:11px}
+#ideas .survey-fieldset legend{font-size:15px;font-weight:700;padding:0 5px;color:#273c4a}
+#ideas .survey-question{font-size:13px;color:#526471;margin:0 0 12px;line-height:1.6}
+#ideas .survey-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 16px}
+#ideas .survey-options label{display:flex!important;align-items:flex-start;gap:8px;padding:7px 0;margin:0!important;font-size:14px!important;line-height:1.5!important;font-weight:450!important;cursor:pointer}
+#ideas .survey-options input{flex:0 0 auto;margin:1px 0 0;accent-color:#176c60}
+#ideas .survey-fieldset .field{margin-top:12px}
+#ideas .note-fields .note-wide{grid-column:1/-1}
+#ideas .survey-fieldset [hidden]{display:none!important}
+@media(max-width:600px){#ideas .survey-options{grid-template-columns:1fr;gap:2px}#ideas .survey-fieldset{padding:14px 13px}#ideas .note-survey{gap:14px}}
+
+/* Field notes questionnaire: deliberately spacious and consistently aligned. */
+#ideas .note-editor{padding:27px 28px !important}
+#ideas .note-intro{margin-bottom:21px !important;max-width:640px}
+#ideas #ideaForm{max-width:660px;margin:0 auto}
+#ideas #ideaForm .note-selector{margin-bottom:26px !important;padding-bottom:23px !important}
+#ideas #ideaForm .note-selector label{margin-bottom:8px !important}
+#ideas #ideaForm .note-survey{display:flex !important;flex-direction:column;gap:27px !important;margin-bottom:28px !important}
+#ideas #ideaForm .survey-fieldset{border:0 !important;border-top:1px solid #e3e9ed !important;border-radius:0 !important;padding:19px 0 0 !important;margin:0 !important;min-width:0}
+#ideas #ideaForm .survey-fieldset legend{float:left;display:block;width:100%;padding:0 !important;margin:0 0 7px !important;font-size:16px !important;line-height:1.45;color:#203448;font-weight:750}
+#ideas #ideaForm .survey-fieldset .survey-question{clear:both;font-size:13px !important;line-height:1.6;color:#697b86;margin:0 0 14px !important}
+#ideas #ideaForm .survey-options{display:grid;gap:8px !important;align-items:stretch}
+#ideas #ideaForm .survey-single{grid-template-columns:1fr !important}
+#ideas #ideaForm .survey-multi{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+#ideas #ideaForm .survey-options label{display:flex !important;align-items:center !important;gap:11px !important;padding:11px 13px !important;border:1px solid #dfe6ea !important;border-radius:9px !important;margin:0 !important;background:#fff !important;color:#334652 !important;font-weight:450 !important;font-size:14px !important;line-height:1.45 !important;min-width:0;min-height:45px;transition:background .12s,border-color .12s}
+#ideas #ideaForm .survey-options label:has(input:checked){background:#f0f7f5 !important;border-color:#8bb9ad !important}
+#ideas #ideaForm .survey-options input{width:17px !important;height:17px !important;margin:0 !important;flex-shrink:0;accent-color:#176c60}
+#ideas #ideaForm .survey-fieldset #actionOtherWrap{margin:12px 0 0 !important}
+#ideas #ideaForm .note-fields{display:grid !important;grid-template-columns:1fr !important;gap:19px !important;margin:0 0 25px !important;border-top:1px solid #e3e9ed;padding-top:23px}
+#ideas #ideaForm .note-fields .field{grid-column:1/-1 !important}
+#ideas #ideaForm .note-fields label{margin-bottom:8px !important;font-size:14px !important}
+#ideas #ideaForm .note-fields textarea{min-height:96px !important}
+#ideas #ideaForm .note-fields #question{min-height:120px !important}
+#ideas #ideaForm button[type=submit]{margin-top:3px}
+@media(max-width:680px){
+ #ideas .note-editor{padding:21px 17px !important}
+ #ideas #ideaForm .note-survey{gap:23px !important}
+ #ideas #ideaForm .survey-multi{grid-template-columns:1fr !important}
+ #ideas #ideaForm .survey-options label{padding:11px 12px !important;min-height:45px}
+ #ideas #ideaForm .note-fields{gap:17px !important;padding-top:19px}
+ #ideas #ideaForm .note-fields textarea{min-height:92px !important}
+}
+@media(prefers-reduced-motion:reduce){#ideas #ideaForm .survey-options label{transition:none}}
+
+/* 時間的な余裕：緑のラジオボタンを表示。追加のチェックマークは付けない。 */
+#ideas #ideaForm .survey-single label{position:relative;padding-left:13px !important}
+#ideas #ideaForm .survey-single input[type="radio"]{position:static !important;width:17px !important;height:17px !important;opacity:1 !important;pointer-events:auto !important;accent-color:#176c60 !important;appearance:auto !important;flex-shrink:0}
+#ideas #ideaForm .survey-single label:has(input[type="radio"]:checked){background:#f0f7f5 !important;border-color:#8bb9ad !important;color:#203448 !important}
+#ideas #ideaForm .survey-single label:has(input[type="radio"]:checked)::after{content:none !important}
+#ideas #ideaForm .survey-single label:has(input[type="radio"]:focus-visible){outline:2px solid #526777;outline-offset:2px}
+#ideas #ideaForm #result{min-height:142px!important;white-space:pre-wrap}
+@media(max-width:600px){#ideas #ideaForm #result{min-height:132px!important}}
+
+/* Subtle explanation below the hourly wage gap without modifying other metrics */
+
+#timePressureFollowup[hidden]{display:none!important}
+
+/* 時間的な余裕：選択時の二重丸・リングを使わず、選択行のみ淡く強調する。 */
+#ideas #ideaForm .survey-single label{position:relative;cursor:pointer;padding-left:14px !important}
+#ideas #ideaForm .survey-single input[type="radio"]{
+  position:absolute !important;width:1px !important;height:1px !important;
+  opacity:0 !important;margin:0 !important;padding:0 !important;
+  pointer-events:none !important;appearance:none !important;
+}
+#ideas #ideaForm .survey-single label:has(input[type="radio"]:checked){
+  background:#f0f7f5 !important;border-color:#8bb9ad !important;
+}
+#ideas #ideaForm .survey-single label:has(input[type="radio"]:checked)::before,
+#ideas #ideaForm .survey-single label:has(input[type="radio"]:checked)::after{content:none !important;display:none !important}
+#ideas #ideaForm .survey-single label:has(input[type="radio"]:focus-visible){outline:2px solid #526777;outline-offset:2px}
+#ideas #ideaForm #timePressureFollowup .survey-question{margin-top:0 !important}
+#ideas .survey-fieldset legend{line-height:1.65}
+/* Stable field-note questionnaire layout: avoid floating legends and inline clipping. */
+#ideas #ideaForm .survey-fieldset legend{float:none !important;display:block !important;width:auto !important;max-width:100% !important;margin:0 0 14px !important;padding:0 !important;white-space:normal !important}
+#ideas #ideaForm .survey-fieldset{display:block;min-width:0}
+#ideas #ideaForm .survey-options label{overflow-wrap:anywhere;word-break:normal}
+#ideas #ideaForm #timePressureFollowup .survey-question{margin:0 0 10px !important;color:#203448;font-size:15px !important;font-weight:600}
+#ideas #ideaForm #timePressureFollowup .field{margin-top:0 !important}
+
+/* Typography refinement: consistent Japanese text hierarchy without layout changes. */
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;letter-spacing:.005em}
+header h1{letter-spacing:.055em;line-height:1.2}
+header p{font-size:14px;line-height:1.6;letter-spacing:.015em}
+nav button{font-weight:600;line-height:1.4;letter-spacing:0}
+#record h2,#dashboard h2,#ideas h2,#manage h2{font-weight:700;line-height:1.35;letter-spacing:.01em}
+#record h3,#ideas h3,#manage h3{font-weight:700;line-height:1.5;letter-spacing:.005em}
+#record .field label,#dashboard .field label,#ideas #ideaForm .field label{font-weight:600;line-height:1.5}
+#ideas .note-intro{font-size:13px !important;line-height:1.75 !important;margin-bottom:7px !important}
+#ideas .note-cooperation{color:#526775;font-size:13px;line-height:1.65;margin:0 0 21px;font-weight:400}
+#ideas #ideaForm .survey-fieldset legend{font-size:15px !important;font-weight:650 !important;line-height:1.55 !important}
+#ideas #ideaForm .survey-options label{font-size:14px !important;font-weight:450 !important;line-height:1.55 !important}
+#ideas #ideaForm #timePressureFollowup .survey-question{font-size:14px !important;font-weight:600 !important;line-height:1.6 !important}
+#ideas #ideaForm textarea::placeholder{font-size:13px;line-height:1.65;font-weight:400;color:#8996a0}
+#live .metric small,#dashboard #metrics .metric small{line-height:1.5 !important;letter-spacing:0}
+#live .metric strong,#dashboard #metrics .metric strong{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+@media(max-width:600px){#ideas .note-intro{font-size:12.5px !important}#ideas .note-cooperation{font-size:12.5px;margin-bottom:18px}}
+
+/* 現場ノート：説明を強調し、協力依頼は通常の字重に */
+#ideas .note-intro{font-weight:650 !important;color:#344b5a !important}
+#ideas .note-cooperation{font-weight:400 !important}
+
+/* Shorten only the Dashboard hourly-gap label while keeping its calculation unchanged. */
+#dashboard #metrics > .hourly-gap-metric small{white-space:nowrap!important;font-size:clamp(11px,2.9vw,14px)!important;letter-spacing:-.025em!important;overflow-wrap:normal!important}
+</style></head><body><main><header><div class="brand"><div class="logo" aria-hidden="true">▤</div><div><h1>BLOCK TRACKER</h1><p>労働者参加型 ブロック 記録・分析ツール</p><small>個人記録版 V1.1</small></div></div></header><div class="notice" style="background:#f3f7ff;border:1px solid #dce5f6;color:#324c71;margin:12px 0">デモ版：ブロック記録は1件の入力例、マイダッシュボードは12件の架空データで表示しています。実際の調査データではありません。</div><div id="storage" class="notice" role="status"></div><nav aria-label="メニュー"><button class="active" data-page="record">ブロック記録</button><button data-page="dashboard">マイデータ</button><button data-page="ideas">現場ノート</button><button data-page="manage">データ管理</button></nav><div id="status" class="status" role="status" aria-live="polite"></div>
+<section id="record" class="card"><h2>新規ブロック記録</h2><p class="muted">1 ブロックにつき1件。<strong>運転中は入力しないでください。</strong> <span class="time-hint">入力目安：約2〜3分</span></p><div hidden><select id="previewBlockSelect" aria-label="表示する架空ブロック"></select></div><form id="recordForm"><div class="section"><h3>01　基本情報・ブロック受諾時</h3><div id="basic" class="grid"></div></div><div class="section"><h3>02　配送・業務記録</h3><h4>基本情報</h4><div id="after" class="grid"></div><h4>勤務時間</h4><div id="work" class="grid"></div><div class="field"><label>実労働時間（自動計算・入力不可）</label><output id="actualOutput">—</output><small>業務開始時刻から業務終了時刻までを自動計算します。日付をまたぐ場合は翌日として計算します。</small></div><h4>配達記録</h4><div id="results" class="grid"></div><div class="field"><label for="exceptionReason">例外対応の発生理由</label><textarea id="exceptionReason" placeholder="自由に記入してください。"></textarea><small>個人や顧客が特定される情報は記入しないでください。</small></div><h4>走行記録</h4><div id="travel" class="grid"></div><div hidden><select id="pressure"><option value="">未回答</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select><output id="pressureValue"></output><textarea id="reason"></textarea></div></div><div class="section"><h3>03　自動分析</h3><div class="grid" id="live"></div><button class="primary full" type="submit" id="saveRecord">ブロックデータを記録する</button><button type="button" id="cancelEdit" class="full" hidden>編集を取り消す</button></div></form></section>
+<section id="dashboard" hidden><div class="card"><h2>マイダッシュボード</h2><div class="grid"><div class="field"><label for="filterTime">予定時間で絞り込む</label><select id="filterTime"><option value="">すべて</option></select></div><div class="field"><label for="filterID">協力者ID</label><select id="filterID"><option value="">すべて</option></select></div></div><div id="dashMode" class="actions"></div><div id="metrics" class="grid section"></div><p class="muted">平均値は計算可能なブロックのみを対象として算出。</p></div></section>
+<section id="ideas" hidden><div class="card note-editor"><h2>現場ノート</h2><p class="muted note-intro">各ブロックにつき1件、時間的な余裕や対応、評価・アカウント状況、ブロック数・配送量の変化などを記録できます。書ける項目だけご記入ください。</p><p class="note-cooperation">日々の配達で感じたことや経験を共有していただけることが、研究の大きな支えになります。無理のない範囲でご協力いただけましたら幸いです。</p><form id="ideaForm"><div class="field note-selector"><label for="noteBlock">対象ブロック</label><select id="noteBlock" required><option value="">ブロックを選択してください</option></select></div>
+<div class="note-survey">
+<fieldset class="survey-fieldset"><legend>今回の配達では、時間に余裕がありましたか？</legend><div class="survey-options survey-single">
+<label><input type="radio" name="timeMargin" value="非常に余裕があった">非常に余裕があった</label>
+<label><input type="radio" name="timeMargin" value="やや余裕があった">やや余裕があった</label>
+<label><input type="radio" name="timeMargin" value="どちらともいえない">どちらともいえない</label>
+<label><input type="radio" name="timeMargin" value="あまり余裕がなかった">あまり余裕がなかった</label>
+<label><input type="radio" name="timeMargin" value="まったく余裕がなかった">まったく余裕がなかった</label>
+</div></fieldset>
+<div id="timePressureFollowup" class="survey-fieldset" hidden>
+<p class="survey-question">今回の配達で時間が足りないと感じたとき、どのように対応しましたか。具体的にご記入ください。</p>
+<div class="field note-wide"><textarea id="question" rows="4" placeholder="具体的な状況や対応を自由に記入してください"></textarea></div>
+</div>
+</div>
+<div class="note-fields">
+
+<div class="field note-wide"><label for="result">その他の記録</label><textarea id="result" rows="5" placeholder="評価・アカウント状況の変化&#10;ブロック数・配送量の変化など&#10;研究者に伝えたいことなど"></textarea></div>
+</div><button class="primary full" type="submit">ノートを保存する</button></form></div><div class="card note-history"><h3>保存した現場ノート</h3><div id="ideaList"></div></div></section>
+<section id="manage" hidden><div class="card"><h2>データ管理</h2><div class="notice warn">データはこのブラウザ内に保存されます。端末の変更、履歴削除、プライベートブラウズ等で失われることがあります。定期的にCSVを保存してください。研究者に自動送信されません。</div><div class="actions"><button id="exportRecords">ブロック CSVを保存</button><button id="exportIdeas">現場ノートCSVを保存</button></div><div class="section"><h3>CSVの読み込み</h3><p class="muted">本ツールから保存したCSVを選択してください。同一の記録IDは追加しません。</p><label for="importRecords">ブロック CSV</label><input id="importRecords" type="file" accept=".csv,text/csv"><label for="importIdeas">現場ノート CSV</label><input id="importIdeas" type="file" accept=".csv,text/csv"></div><div class="section"><button id="demo">架空データで試す</button><p class="muted">架空データは実データと区別し、通常の集計・CSV出力から除外します。</p><button id="clearDemo">架空データのみ削除</button></div></div><div class="card"><h3>保存済みブロック一覧</h3><div class="scroll" id="recordList"></div><div class="section"><button id="clearAll" class="bad">すべてのデータを削除</button></div></div></section><footer>個人用試作版 ｜ 正式調査前に同意・データ管理方法を確認</footer></main>
+<script>
+'use strict';const $=id=>document.getElementById(id);const key='block-tracker-jp-v2-demo-preview-gap300';let storageOK=true;let records=[],ideas=[],editing=null,ideaEditing=null,showDemo=false;try{const raw=localStorage.getItem(key);if(raw){const x=JSON.parse(raw);records=Array.isArray(x.records)?x.records:[];ideas=Array.isArray(x.ideas)?x.ideas:[];}localStorage.setItem(key,JSON.stringify({records,ideas}));}catch(e){storageOK=false;}function storageMessage(){ $('storage').textContent=storageOK?'端末内保存モード ｜ データは外部に送信されません。旧版とは別に保存されます。':'端末内保存が利用できません。ページを閉じる前にCSVを保存してください。';$('storage').classList.toggle('warn',!storageOK);}storageMessage();for(const r of records){if(Object.prototype.hasOwnProperty.call(r,'breakHours')){r.breakMins=(Number(r.breakHours)||0)*60+(Number(r.breakMins)||0);delete r.breakHours;}}function save(){try{localStorage.setItem(key,JSON.stringify({records,ideas}));storageOK=true;}catch(e){storageOK=false;}storageMessage();}function msg(t){$('status').textContent=t;}const uid=()=> globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};const specs={basic:[['worker','調査協力者ID（匿名）','text'],['station','配送ステーション名','text'],['offer','ブロック受諾日付','date',true],['blockDate','ブロック実施日','date',true],['start','ブロック開始時刻（アプリ表示）','time',true],['end','ブロック終了時刻（アプリ表示）','time',true],['pay','提示報酬（円）','number',true,0],['premium','割増報酬の有無','select',false,0,['','あり','なし','不明']],['extra','追加報酬（円）','number']],after:[['packages','荷物の総数（個）','number',true,0],['pins','ピン個数（個）','number'],['specified','時間指定荷物（個）','number'],['weather','天候','text'],['traffic','交通状況','select',false,0,['','渋滞なし','やや混雑','非常に混雑','その他（自由記述）']]],work:[['checkin','業務開始時刻','time',true],['finish','業務終了時刻','time',true],['deliveryStart','配達開始時刻','time']],results:[['redelivery','再配達荷物数（個）','number'],['returned','持ち戻り荷物数（個）','number'],['undelivered','未配荷物数（個）','number'],['exceptionMinutes','各種の例外対応に要した時間（分）','number']],travel:[['distance','配送距離（km）','number',false,0],['fuel','燃料費（円）','number',false,0]]};const all=Object.values(specs).flat();function el(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}for(const [group,fields] of Object.entries(specs)){for(const [id,label,type,required,min,opts] of fields){const wrap=el('div',undefined,'field');const l=el('label',label);l.htmlFor=id;wrap.append(l);const input=el(type==='select'?'select':type==='textarea'?'textarea':'input');input.id=id;input.name=id;if(type==='textarea'&&(id==='weather'||id==='traffic')){input.rows=3;input.placeholder='状況を自由に記述してください。';}if(type==='select'){for(const val of opts){const opt=el('option',val||'未回答');opt.value=val;input.append(opt);}}else if(type!=='textarea')input.type=type;if(type==='number'){input.min=min??0;input.step=id==='distance'?'0.1':'1';input.inputMode='decimal';}if(required)input.required=true;if(id==='blockDate')input.value=today();wrap.append(input);const hints={extra:'追加報酬なしの場合は0を入力。未確定の場合は空欄。'};if(hints[id])wrap.append(el('small',hints[id]));
+if(id==='traffic'){
+ const help=el('small','ブロック全体の交通状況について、最も当てはまるものを選択してください。','traffic-help');
+ wrap.insertBefore(help,input);
+ const detail=el('input');detail.type='text';detail.id='trafficOther';detail.placeholder='交通状況を自由に記入してください';
+ detail.hidden=true;detail.setAttribute('aria-label','その他の交通状況');
+ wrap.append(detail);
+ input.addEventListener('change',()=>{detail.hidden=input.value!=='その他（自由記述）';if(detail.hidden)detail.value='';});
+}
+$(group).append(wrap);}}const fields=[...all.map(x=>x[0]),'pressure','reason','exceptionReason'];const numbers=all.filter(x=>x[2]==='number').map(x=>x[0]);const num=v=>v===''||v==null?null:Number(v);const finite=v=>typeof v==='number'&&Number.isFinite(v);const yen=v=>finite(v)?'¥'+v.toLocaleString('ja-JP',{minimumFractionDigits:1,maximumFractionDigits:1}):'—';const fmt=(v,d=1)=>finite(v)?v.toFixed(d):'—';const sum=(arr,f)=>arr.reduce((s,r)=>s+(f(r)??0),0);const mean=(arr,f)=>{let x=arr.map(f).filter(finite);return x.length?x.reduce((a,b)=>a+b,0)/x.length:null;};const minutes=(a,b)=>{if(!a||!b||!a.includes('T')||!b.includes('T'))return null;const n=(Date.parse(b+'+09:00')-Date.parse(a+'+09:00'))/60000;return Number.isFinite(n)?n:null;};const hm=n=>Number.isFinite(n)?(n<0?'−':'')+Math.floor(Math.abs(n)/60)+'時間'+Math.abs(n)%60+'分':'—';function derive(r){r.date=(r.start||'').slice(0,10);r.planned=minutes(r.start,r.end);const span=minutes(r.checkin,r.finish);r.breaks=0;r.actual=span;return r;}function completed(r){return finite(r.packages)&&finite(r.returned)&&finite(r.undelivered)&&r.returned+r.undelivered<=r.packages?r.packages-r.returned-r.undelivered:null;}const ratio=(v,total)=>finite(v)&&v>=0&&total>0&&v<=total?v/total*100:null;const pct=v=>finite(v)?fmt(v)+'%':'—';const signed=v=>finite(v)?(v>0?'+':'')+fmt(v,1)+'分':'—';function calc(r){
+ const planned=r.planned, actual=r.actual, pay=r.pay, packages=r.packages;
+ const totalPay=finite(pay)?pay+(finite(r.extra)?r.extra:0):null;
+ const delivered=completed(r);
+ return {
+  expected:planned>0&&finite(pay)?pay*60/planned:null,
+  rate:actual>0&&finite(totalPay)?totalPay*60/actual:null,
+  hourlyGap:planned>0&&actual>0&&finite(pay)&&finite(totalPay)&&finite(r.fuel)?(totalPay-r.fuel)*60/actual-pay*60/planned:null,
+  fuelRate:actual>0&&finite(totalPay)&&finite(r.fuel)?(totalPay-r.fuel)*60/actual:null,
+  overtime:planned>0&&actual>0?Math.max(0,actual-planned):null,
+  density:actual>0&&finite(packages)?packages*60/actual:null,
+  deliveryPeriodDensity:finite(packages)&&minutes(r.deliveryStart,r.finish)>0?packages*60/minutes(r.deliveryStart,r.finish):null,
+  plannedDensity:planned>0&&finite(packages)?packages*60/planned:null,
+  minutesPerPackage:actual>0&&finite(packages)&&packages>0?actual/packages:null,
+  actualDensity:actual>0&&finite(delivered)?delivered*60/actual:null,
+  minutesPerDelivered:actual>0&&finite(delivered)&&delivered>0?actual/delivered:null,
+  endDiff:minutes(r.end,r.finish),
+  diff:planned>0&&actual>0?actual-planned:null,
+  exceptionRate:actual>0&&finite(r.exceptionMinutes)&&r.exceptionMinutes<=actual?r.exceptionMinutes/actual*100:null,
+   responseCountRate:packages>0&&[r.redelivery,r.undelivered].every(finite)?(r.redelivery+r.undelivered)/packages*100:null,
+  payPerPackage:finite(totalPay)&&packages>0?totalPay/packages:null,
+  exceeded:planned>0&&actual>0?actual>planned:null
+ };
+}
+function formData(){const r={};for(const k of fields){if(numbers.includes(k)||k==='pressure'){r[k]=num($(k).value);}else r[k]=$(k).value;}
+// Preserve a single CSV field for traffic, including free text in その他.
+if(r.traffic==='その他（自由記述）')r.traffic=$('trafficOther').value.trim()||'その他';
+ // Preserve the historical full datetime record schema while requesting the date once.
+const base=r.blockDate||'';if(r.offer&&/^\d{4}-\d{2}-\d{2}$/.test(r.offer))r.offer=r.offer+'T00:00';r.start=base&&r.start?base+'T'+r.start:'';r.end=base&&r.end?base+'T'+r.end:'';
+if(r.start&&r.end&&minutes(r.start,r.end)<0){const d=new Date(base+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);r.end=d.toISOString().slice(0,10)+'T'+$('end').value;}
+// Work time inputs are clock-only. Attach the ブロック's app-displayed start date
+// and advance the day when sequential times cross midnight.
+let day=(r.start||'').slice(0,10)||today();let previous=null;
+for(const k of ['checkin','deliveryStart','finish']){
+ const clock=r[k];if(!clock){r[k]='';continue;}
+ let stamp=day+'T'+clock;
+ if(previous&&minutes(previous,stamp)<0){const d=new Date(day+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+1);day=d.toISOString().slice(0,10);stamp=day+'T'+clock;}
+ r[k]=stamp;previous=stamp;
+}
+delete r.blockDate;r.countUnit='packages';r.breakMins=0;return derive(r);}function metric(parent,label,value,color,unit=''){const b=el('div',undefined,'metric');if(label==='平均時給差（控除後）'){b.title='平均予定時給と実際時給（燃料費控除後）の差';b.classList.add('hourly-gap-metric');}const number=el('strong',value,color);if(unit){const u=el('span',unit,'value-unit');number.append(document.createTextNode(' '),u);}b.append(el('small',label),number);parent.append(b);}
+const unitValue=(v,unit)=>fmt(v);const unitSignedYen=v=>finite(v)?(v>0?'+':'')+fmt(v):'—';const unitSigned=v=>finite(v)?(v>0?'+':'')+fmt(v):'—';
+function endTimeClass(v){return !finite(v)?'end-neutral':v>0?'end-late':v<0?'end-early':'end-neutral';}function live(){const r=formData(),c=calc(r);
+ $('actualOutput').textContent=hm(r.actual);$('live').replaceChildren();
+ metric($('live'),'予定の時給',unitValue(c.expected,'円/時'),undefined,'円/時');
+ metric($('live'),'実際の時給（燃料費を引く前）',unitValue(c.rate,'円/時'),undefined,'円/時');
+
+ metric($('live'),'実際の時給（燃料費を引いた後）',unitValue(c.fuelRate,'円/時'),undefined,'円/時');
+ metric($('live'),'予定時給と実際時給（燃料費控除後）の差',unitSignedYen(c.hourlyGap),c.hourlyGap>0?'good':(c.hourlyGap<0?'bad':undefined),'円/時');
+ metric($('live'),'荷物1個あたりの報酬',unitValue(c.payPerPackage,'円/個'),undefined,'円/個');
+ metric($('live'),'配達ペース',unitValue(c.deliveryPeriodDensity,'個/時'),undefined,'個/時');
+
+}
+function resetForm(){autoCheckin=true;editing=null;$('recordForm').reset();$('trafficOther').value='';$('trafficOther').hidden=true;$('blockDate').value=today();['start','end','offer','checkin','deliveryStart','finish'].forEach(k=>$(k).value='');$('saveRecord').textContent='ブロックデータを記録する';$('cancelEdit').hidden=true;live();}function page(id){document.querySelectorAll('main>section').forEach(x=>x.hidden=x.id!==id);document.querySelectorAll('nav button').forEach(x=>{x.classList.toggle('active',x.dataset.page===id);x.setAttribute('aria-current',x.dataset.page===id?'page':'false');});if(id==='dashboard')dashboard();if(id==='manage')manage();if(id==='ideas'){refreshNoteBlocks();renderIdeas();}}document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>page(b.dataset.page));let autoCheckin=true;$('recordForm').addEventListener('input',e=>{if(e.target.id==='checkin')autoCheckin=!$('checkin').value;if(e.target.id==='start'&&(autoCheckin||!$('checkin').value)){$('checkin').value=$('start').value;autoCheckin=true;}live();});$('cancelEdit').onclick=resetForm;function valid(r){const span=minutes(r.checkin,r.finish);
+ const ds=minutes(r.checkin,r.deliveryStart),df=minutes(r.deliveryStart,r.finish);
+ return finite(span)&&span>=0&&(!r.deliveryStart||(finite(ds)&&ds>=0&&finite(df)&&df>=0))
+ &&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&r.planned>0&&r.actual>0
+ &&!!r.offer&&/^\d{4}-\d{2}-\d{2}$/.test(r.offer.slice(0,10))&&r.offer.slice(0,10)<=r.date&&finite(r.pay)&&r.pay>=0
+ &&finite(r.packages)&&r.packages>=0
+ &&(r.returned==null||r.undelivered==null||r.returned+r.undelivered<=r.packages)
+ &&(r.specified==null||r.specified<=r.packages)
+ &&(r.exceptionMinutes==null||r.exceptionMinutes<=r.actual)
+ &&numbers.every(k=>r[k]==null||finite(r[k])&&r[k]>=0&&(k==='distance'||Number.isInteger(r[k])))
+ &&(r.pressure===null||[1,2,3,4,5].includes(r.pressure));}
+$('recordForm').onsubmit=e=>{e.preventDefault();const r=formData();if(!valid(r)){msg('時刻を確認してください。配達開始時刻は業務時間内にしてください。');return;}if(editing){let idx=records.findIndex(x=>x.id===editing);if(idx>=0)records[idx]={...records[idx],...r};}else records.push({...r,id:uid(),demo:false});save();resetForm();msg('ブロックを記録しました。');showDemo=false;page('dashboard');};function editRecord(id){const r=records.find(x=>x.id===id);if(!r)return;resetForm();autoCheckin=false;editing=id;for(const k of fields){$(k).value=k==='blockDate'?((r.start||'').slice(0,10)||r.date||today()):(['start','end','checkin','deliveryStart','finish'].includes(k)?(r[k]||'').slice(11,16):(k==='offer'?(r.offer||'').slice(0,10):(r[k]??'')));}
+const choices=['','渋滞なし','やや混雑','非常に混雑'];
+const trafficText=(r.traffic||'').trim();
+if(choices.includes(trafficText)){$('traffic').value=trafficText;$('trafficOther').hidden=true;}
+else if(trafficText){$('traffic').value='その他（自由記述）';$('trafficOther').hidden=false;$('trafficOther').value=trafficText;}
+$('saveRecord').textContent='変更を保存する';$('cancelEdit').hidden=false;page('record');live();}function chart(parent,title,arr,series,unit=''){const block=el('div',undefined,'chart');block.append(el('h3',title));if(!arr.length){block.append(el('p','データがありません。','muted'));parent.append(block);return;}const data=arr.slice(-30),max=Math.max(1,...data.flatMap(r=>series.map(s=>s.f(r)).filter(finite)));const ns='http://www.w3.org/2000/svg';const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 600 240');svg.setAttribute('role','img');svg.setAttribute('aria-label',title);function shape(tag,attrs,txt){const e=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);if(txt!==undefined)e.textContent=txt;svg.append(e);return e;}const left=58,top=12,bottom=202,w=525,h=190;for(let t=0;t<=4;t++){const y=bottom-h*t/4;shape('line',{x1:left,x2:left+w,y1:y,y2:y,stroke:'#e0e6ec'});shape('text',{x:left-6,y:y+4,'text-anchor':'end','font-size':11,fill:'#657585'},(max*t/4).toLocaleString('ja-JP',{minimumFractionDigits:1,maximumFractionDigits:1})+unit);}const step=w/data.length;data.forEach((r,i)=>{series.forEach((s,j)=>{const v=s.f(r);if(!finite(v))return;const bw=step*.78/series.length;const rect=shape('rect',{x:left+i*step+step*.11+j*bw,y:bottom-v/max*h,width:Math.max(1,bw-1),height:v/max*h,fill:s.color,rx:2});const tooltip=document.createElementNS(ns,'title');tooltip.textContent=`${r.date||''} ${s.name}: ${fmt(v)}${unit}`;rect.append(tooltip);});if(data.length<=15||i%Math.ceil(data.length/12)===0)shape('text',{x:left+(i+.5)*step,y:222,'text-anchor':'middle','font-size':10,fill:'#657585'},'B'+(arr.length-data.length+i+1));});block.append(svg);const legend=el('div',undefined,'legend');for(const s of series){const x=el('span');const d=el('i',undefined,'dot');d.style.background=s.color;x.append(d,document.createTextNode(s.name));legend.append(x);}block.append(legend);parent.append(block);}function fillOptions(id,values,label){const s=$(id),old=s.value;s.replaceChildren();const o=el('option','すべて');o.value='';s.append(o);for(const v of values){const a=el('option',label(v));a.value=v;s.append(a);}if([...s.options].some(o=>o.value===old))s.value=old;}function dashboard(){
+ const pool=records.filter(r=>!!r.demo===showDemo);
+ fillOptions('filterTime',[...new Set(pool.map(r=>r.planned))].sort((a,b)=>a-b),v=>hm(v));
+ fillOptions('filterID',[...new Set(pool.map(r=>r.worker).filter(Boolean))],v=>v);
+ const arr=pool.filter(r=>(!$('filterTime').value||r.planned===Number($('filterTime').value))&&(!$('filterID').value||r.worker===$('filterID').value)).sort((a,b)=>a.date.localeCompare(b.date));
+ $('metrics').replaceChildren();
+ metric($('metrics'),'記録ブロック数',String(arr.length),undefined,'ブロック');
+ metric($('metrics'),'平均予定の時給',unitValue(mean(arr,r=>calc(r).expected),'円/時'),undefined,'円/時');
+ metric($('metrics'),'平均実際の時給（燃料費を引く前）',unitValue(mean(arr,r=>calc(r).rate),'円/時'),undefined,'円/時');
+
+ metric($('metrics'),'平均実際の時給（燃料費を引いた後）',unitValue(mean(arr,r=>calc(r).fuelRate),'円/時'),undefined,'円/時');
+ metric($('metrics'),'平均時給差（控除後）',unitSignedYen(mean(arr,r=>calc(r).hourlyGap)),mean(arr,r=>calc(r).hourlyGap)>0?'good':(mean(arr,r=>calc(r).hourlyGap)<0?'bad':undefined),'円/時');
+ metric($('metrics'),'平均荷物1個あたりの報酬',unitValue(mean(arr,r=>calc(r).payPerPackage),'円/個'),undefined,'円/個');
+ metric($('metrics'),'平均配送個数',unitValue(mean(arr,r=>finite(r.packages)?r.packages:null),'個'),undefined,'個');
+ metric($('metrics'),'平均配送距離',unitValue(mean(arr,r=>finite(r.distance)?r.distance:null),'km'),undefined,'km');
+ const validOvertime=arr.filter(r=>calc(r).exceeded!==null);
+ const overtimeCount=validOvertime.filter(r=>calc(r).exceeded).length;
+ metric($('metrics'),'時間超過ブロックの割合',unitValue(validOvertime.length?overtimeCount/validOvertime.length*100:null,'%'),undefined,'%');
+ if(validOvertime.length){
+  const overtimeCard=$('metrics').lastElementChild;
+  const allValid=validOvertime.length===arr.length;
+  const explanation=el('span',`${allValid?'記録した':'比較可能な'}${validOvertime.length}ブロックのうち、${overtimeCount}ブロックで予定時間を超えました。`,'overtime-detail');
+  overtimeCard.append(explanation);
+ }
+ // 各ブロックの実労働時間と予定時間の差が正の場合のみ分単位で累計する。
+ // Σ max(0, 実労働時間[時間] − 予定時間[時間]) × 60
+ // calc(r).overtime は既に「分」単位なので60を重ねて掛けない。
+ const overtimeValues=arr.map(r=>calc(r).overtime).filter(finite);
+ const overtimeMinutes=overtimeValues.reduce((total,value)=>total+value,0);
+ metric($('metrics'),'超過時間の累計',unitValue(overtimeValues.length?overtimeMinutes:null,'分'),undefined,'分');
+
+ const p=$('dashMode');p.replaceChildren();
+ p.append(el('span',showDemo?'架空データ表示中（研究データではありません）':'実データ表示中','muted'));
+ if(showDemo){const b=el('button','実データに戻る');b.type='button';b.onclick=()=>{showDemo=false;dashboard();};p.append(b);}
+}
+for(const id of ['filterTime','filterID'])$(id).onchange=dashboard;
+function manage(){const p=$('recordList');p.replaceChildren();if(!records.length){p.append(el('p','まだ記録はありません。','muted'));return;}const t=el('table'),head=el('tr');for(const h of ['日付','ID','予定時間','実働時間','報酬（円）','荷物（個）','実働時給（円/時）','操作'])head.append(el('th',h));const th=el('thead');th.append(head);t.append(th);const body=el('tbody');for(const r of [...records].reverse()){const row=el('tr');for(const v of [r.date+(r.demo?'（架空）':''),r.worker||'—',hm(r.planned),hm(r.actual),r.pay,r.packages,yen(calc(r).rate)])row.append(el('td',String(v)));const td=el('td');const edit=el('button','編集');edit.onclick=()=>editRecord(r.id);const del=el('button','削除','bad');del.onclick=()=>{if(confirm('この記録を削除しますか？ 関連する現場ノートは残りますが、ブロックとの紐付けは失われます。')){records=records.filter(x=>x.id!==r.id);save();manage();msg('記録を削除しました。');}};td.append(edit,del);row.append(td);body.append(row);}t.append(body);p.append(t);}const ideaFields=['question','hypothesis','method','result','timeMargin','deliveryActions','actionOther'];
+function noteBlockTitle(r){return (r.date||r.blockDate||'日付不明')+' ｜ '+(r.station||'ステーション未記入')+' ｜ '+((r.start||'').slice(11,16)||'時刻未記入')+'〜'+((r.end||'').slice(11,16)||'時刻未記入')+(r.worker?' ｜ '+r.worker:'');}
+function refreshNoteBlocks(){const s=$('noteBlock'),selected=s.value;s.replaceChildren();const empty=el('option','ブロックを選択してください');empty.value='';s.append(empty);for(const r of [...records].reverse().filter(r=>!r.demo)){const o=el('option',noteBlockTitle(r));o.value=r.id;s.append(o);}s.value=[...s.options].some(o=>o.value===selected)?selected:'';}
+const lowMarginValues=new Set(['あまり余裕がなかった','まったく余裕がなかった']);
+function updateTimePressureFollowup(){
+ const current=document.querySelector('input[name="timeMargin"]:checked')?.value||'';
+ $('timePressureFollowup').hidden=!lowMarginValues.has(current);
+}
+document.querySelectorAll('input[name="timeMargin"]').forEach(input=>input.addEventListener('change',updateTimePressureFollowup));
+function resetIdea(){ideaEditing=null;$('ideaForm').reset();updateTimePressureFollowup();$('ideaForm').querySelector('button[type="submit"]').textContent='ノートを保存する';}
+function loadIdea(r){
+ refreshNoteBlocks();ideaEditing=r.id;
+ $('noteBlock').value=records.some(x=>x.id===r.recordId&&!x.demo)?r.recordId:'';
+ $('question').value=[r.question||'',r.deliveryActions?'過去の記録（対応）：'+r.deliveryActions:'',r.actionOther?'その他の対応：'+r.actionOther:''].filter(Boolean).join('\n\n');
+ const previousNotes=[r.hypothesis?`評価・アカウント状況の変化：${r.hypothesis}`:'',r.method?`ブロック数・配送量の変化：${r.method}`:'',r.result||''].filter(Boolean);
+ $('result').value=previousNotes.join('\n\n');
+ document.querySelectorAll('input[name="timeMargin"]').forEach(x=>x.checked=x.value===(r.timeMargin||''));
+ updateTimePressureFollowup();
+ $('ideaForm').querySelector('button[type="submit"]').textContent='ノートの変更を保存する';
+ $('noteBlock').focus();
+}
+function renderIdeas(){const p=$('ideaList');p.replaceChildren();if(!ideas.length)p.append(el('p','まだノートはありません。','muted'));
+ for(const r of [...ideas].reverse()){
+ const div=el('div',undefined,'entry'),linked=records.find(x=>x.id===r.recordId);
+ div.append(el('small',linked?noteBlockTitle(linked):r.recordId?'関連ブロックが見つかりません':(r.date||'日付不明')+' ｜ 旧版のノート（ブロック未指定）'),el('h3',r.question||r.hypothesis||r.method||r.result||'現場ノート'));
+ for(const [k,l] of [['timeMargin','時間的な余裕'],['deliveryActions','過去の対応記録'],['actionOther','その他の対応'],['hypothesis','評価・アカウント状況の変化'],['method','ブロック数・配送量の変化'],['result','その他の記録']])if(r[k])div.append(el('p',l+'：'+r[k]));
+ const edit=el('button','編集');edit.onclick=()=>loadIdea(r);
+ const del=el('button','削除','bad');del.onclick=()=>{if(confirm('このノートを削除しますか？')){ideas=ideas.filter(x=>x.id!==r.id);if(ideaEditing===r.id)resetIdea();save();renderIdeas();}};
+ const a=el('div',undefined,'actions');a.append(edit,del);div.append(a);p.append(div);
+ }
+}
+$('ideaForm').onsubmit=e=>{
+ e.preventDefault();const recordId=$('noteBlock').value;
+ if(!recordId||!records.some(r=>r.id===recordId)){msg('対象ブロックを選択してください。');return;}
+ const existing=ideas.find(r=>r.recordId===recordId&&r.id!==ideaEditing);
+ if(existing){msg('このブロックには既にノートがあります。「編集」から変更してください。');return;}
+ const values={question:$('timePressureFollowup').hidden?(ideaEditing?(ideas.find(x=>x.id===ideaEditing)?.question||''):''):$('question').value.trim(),hypothesis:'',method:'',result:$('result').value.trim()};
+ values.timeMargin=document.querySelector('input[name="timeMargin"]:checked')?.value||'';
+ values.deliveryActions='';
+ values.actionOther='';
+ if(!Object.values(values).some(Boolean)){msg('いずれかの項目に記入してください。');return;}
+ if(ideaEditing){ideas=ideas.map(r=>r.id===ideaEditing?{...r,recordId,...values}:r);}
+ else ideas.push({id:uid(),date:today(),recordId,...values});
+ save();resetIdea();refreshNoteBlocks();renderIdeas();msg('現場ノートを保存しました。');
+};
+const recordCols=['id',...fields.filter(k=>k!=='blockDate'),'breakMins','date','planned','actual','breaks'];const ideaCols=['id','date','recordId',...ideaFields];// CSV Version 1: derived columns only; on-screen calculations are independent.
+const computed=[
+ '予定時間に基づく換算時給（円/h）',
+ '実働時給（燃料費控除前）（円/h）',
+ '実働時給（燃料費控除後）（円/h）',
+ '荷物1個当たりの報酬（円/個）',
+ '労働時間の差異（min）',
+ '終了時刻の差（min）',
+ '割当荷物密度（個/h）',
+ '実働配送密度（個/h）',
+ '累積超過労働時間（min）',
+ '時間超過ブロックの割合（％）',
+ '例外対応の延べ件数比率（％）',
+ '例外対応発生率（％）',
+ '例外対応時間の割合（％）'
+];
+function csvCell(v){let s=v==null?'':String(v);if(typeof v==='string'&&(/^[\s]*[=+\-@]/.test(s)||/^[\t\r]/.test(s)))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
+function exportCSV(name,cols,rows){const csv='\ufeff'+[cols.join(','),...rows.map(r=>cols.map(k=>csvCell(r[k])).join(','))].join('\r\n');const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=el('a');a.href=u;a.download=name+'_'+today()+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
+function exportRows(){
+ const source=records.filter(r=>!r.demo);
+ const rollup=new Map();
+ // Running statistics are computed in chronological order for each worker.
+ const sorted=[...source].sort((a,b)=>String(a.start||a.date||'').localeCompare(String(b.start||b.date||''))||String(a.id).localeCompare(String(b.id)));
+ const perRecord=new Map();
+ const validNum=v=>finite(v)&&v>=0;
+ const round1=v=>finite(v)?Number(v.toFixed(1)):'';
+ for(const r of sorted){
+  const group=r.worker||'__anonymous__';
+  if(!rollup.has(group))rollup.set(group,{cumOver:0,timeN:0,timeOver:0,eventN:0,eventYes:0});
+  const stats=rollup.get(group);
+  const validTime=finite(r.planned)&&r.planned>0&&finite(r.actual)&&r.actual>0;
+  if(validTime){stats.timeN++;if(r.actual>r.planned)stats.timeOver++;stats.cumOver+=Math.max(0,r.actual-r.planned);}
+  const eventKeys=['redelivery','returned','undelivered'];
+  const values=eventKeys.map(k=>r[k]);
+  const anyEvent=values.some(v=>validNum(v)&&v>0)||(validNum(r.exceptionMinutes)&&r.exceptionMinutes>0);
+  const eventKnown=anyEvent||(values.every(validNum)&&validNum(r.exceptionMinutes));
+  if(eventKnown){stats.eventN++;if(anyEvent)stats.eventYes++;}
+  perRecord.set(r.id,{
+   cumOver:validTime?round1(stats.cumOver):'',
+   overRate:stats.timeN?round1(stats.timeOver/stats.timeN*100):'',
+   eventRate:stats.eventN?round1(stats.eventYes/stats.eventN*100):''
+  });
+ }
+ const rows=source.map(r=>{
+  const planned=r.planned,actual=r.actual,pay=r.pay,packages=r.packages;
+  const agg=perRecord.get(r.id);
+  const eventKeys=['redelivery','returned','undelivered'];
+  const eventNums=eventKeys.map(k=>r[k]);
+  const eventCountKnown=eventNums.every(validNum);
+  // Missing component counts remain missing instead of silently becoming zero.
+  return {...r,
+   '予定時間に基づく換算時給（円/h）':round1(finite(pay)&&planned>0?pay*60/planned:null),
+   '実働時給（燃料費控除前）（円/h）':round1(finite(pay)&&actual>0?pay*60/actual:null),
+   '実働時給（燃料費控除後）（円/h）':round1(finite(pay)&&validNum(r.fuel)&&actual>0?(pay-r.fuel)*60/actual:null),
+   '荷物1個当たりの報酬（円/個）':round1(finite(pay)&&packages>0?pay/packages:null),
+   '労働時間の差異（min）':round1(planned>0&&actual>0?actual-planned:null),
+   '終了時刻の差（min）':round1(minutes(r.end,r.finish)),
+   '割当荷物密度（個/h）':round1(packages>=0&&planned>0?packages*60/planned:null),
+   '実働配送密度（個/h）':round1(actual>0&&finite(completed(r))?completed(r)*60/actual:null),
+   '累積超過労働時間（min）':agg.cumOver,
+   '時間超過ブロックの割合（％）':agg.overRate,
+   '例外対応の延べ件数比率（％）':round1(packages>0&&eventCountKnown?eventNums.reduce((sum,v)=>sum+v,0)/packages*100:null),
+   '例外対応発生率（％）':agg.eventRate,
+   '例外対応時間の割合（％）':round1(actual>0&&validNum(r.exceptionMinutes)&&r.exceptionMinutes<=actual?r.exceptionMinutes/actual*100:null)
+  };
+ });
+ exportCSV('block_records',[...recordCols,...computed],rows);
+}
+$('exportRecords').onclick=exportRows;$('exportIdeas').onclick=()=>exportCSV('block_field_notes',ideaCols,ideas);function readCSV(s){s=s.replace(/^\ufeff/,'');let rows=[],row=[],cell='',quoted=false;for(let i=0;i<s.length;i++){const c=s[i];if(quoted){if(c==='"'&&s[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}else if(c==='"'&&cell==='')quoted=true;else if(c===','){row.push(cell);cell='';}else if(c==='\r'||c==='\n'){if(c==='\r'&&s[i+1]==='\n')i++;row.push(cell);rows.push(row);row=[];cell='';}else cell+=c;}if(quoted)throw Error('CSVの引用符が不正です。');if(cell||row.length){row.push(cell);rows.push(row);}return rows.filter(r=>r.some(x=>x!==''));}async function importCSV(input,kind){try{const file=input.files[0];if(!file)return;if(file.size>15000000)throw Error('15MB以下のファイルを選択してください。');const [headers,...rows]=readCSV(await file.text());const cols=kind==='record'?recordCols:ideaCols;if(!headers||(kind==='record'?!['id','start','end','pay','packages','checkin','finish'].every(k=>headers.includes(k)):!['id','date',...ideaFields].every(k=>headers.includes(k))))throw Error('このツールのCSV形式ではありません。');const list=kind==='record'?records:ideas;const seen=new Set(list.map(r=>r.id));let added=[],invalid=0,duplicates=0;for(const row of rows){const r=Object.fromEntries(cols.map(k=>[k,row[headers.indexOf(k)]??'']));if(!r.id){invalid++;continue;}if(seen.has(r.id)){duplicates++;continue;}if(kind==='record'){for(const k of [...numbers,'breakMins','pressure'])r[k]=num(r[k]);if(headers.includes('breakHours'))r.breakMins=(Number(row[headers.indexOf('breakHours')])||0)*60+(r.breakMins??0);r.countUnit=row[headers.indexOf('countUnit')]==='packages'?'packages':null;r.demo=false;derive(r);if(!valid(r)){invalid++;continue;}}else{if(!ideaFields.some(k=>(r[k]||'').trim())||!/^\d{4}-\d{2}-\d{2}$/.test(r.date)){invalid++;continue;}if(r.recordId&&( !records.some(x=>x.id===r.recordId&&!x.demo)||list.some(x=>x.recordId===r.recordId)||added.some(x=>x.recordId===r.recordId))){duplicates++;continue;}}seen.add(r.id);added.push(r);}if(!confirm(`${added.length}件を追加します（重複 ${duplicates}件、無効 ${invalid}件）。よろしいですか？`))return;list.push(...added);save();manage();msg(`${added.length}件を追加しました。重複 ${duplicates}件・無効 ${invalid}件はスキップ。`);}catch(e){msg('読み込みエラー：'+e.message);}finally{input.value='';}}$('importRecords').onchange=e=>importCSV(e.target,'record');$('importIdeas').onchange=e=>importCSV(e.target,'idea');$('demo').onclick=()=>{if(!records.some(r=>r.demo)){const vals=[[87,70,288],[124,95,384],[96,78,330],[161,120,492],[112,89,366],[145,117,456],[78,61,258],[136,101,426]];vals.forEach(([packages,distance,actual],i)=>{const r=Object.fromEntries(fields.map(k=>[k,numbers.includes(k)||k==='pressure'?null:'']));records.push({...r,id:uid(),demo:true,worker:'DEMO',date:`2026-11-${String(10+i).padStart(2,'0')}`,start:`2026-11-${String(10+i).padStart(2,'0')}T09:00`,end:`2026-11-${String(10+i).padStart(2,'0')}T15:00`,checkin:`2026-11-${String(10+i).padStart(2,'0')}T09:00`,finish:`2026-11-${String(10+i).padStart(2,'0')}T${String(9+Math.floor(actual/60)).padStart(2,'0')}:${String(actual%60).padStart(2,'0')}`,planned:360,pay:12000,extra:0,packages,distance,actual,pressure:Math.min(5,Math.max(1,Math.round(actual/100)))});});save();}showDemo=true;page('dashboard');};$('clearDemo').onclick=()=>{records=records.filter(r=>!r.demo);showDemo=false;save();manage();msg('架空データを削除しました。');};$('clearAll').onclick=()=>{if(confirm('ブロック記録と現場ノートをすべて削除します。CSVのバックアップは済んでいますか？')&&confirm('本当に削除しますか？元に戻せません。')){records=[];ideas=[];save();resetForm();resetIdea();manage();msg('すべてのデータを削除しました。');}};resetForm();
+// DEMO PREVIEW ONLY: these records are fictitious, isolated from the regular app storage.
+const initialPreviewData=[{"id":"virtual-block-001","worker":"DEMO01","station":"東京東A","offer":"2026-10-30T00:00","start":"2026-11-01T09:00","end":"2026-11-01T11:00","pay":4100.0,"premium":"なし","extra":0.0,"packages":35.0,"pins":27.0,"specified":0.0,"weather":"晴れ","traffic":"渋滞なし","checkin":"2026-11-01T08:55","finish":"2026-11-01T11:13","deliveryStart":"2026-11-01T09:30","redelivery":0.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":0,"distance":21.0,"fuel":290.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-01","planned":120.0,"actual":138.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-002","worker":"DEMO01","station":"東京西B","offer":"2026-11-01T00:00","start":"2026-11-03T09:00","end":"2026-11-03T15:00","pay":12300.0,"premium":"あり","extra":0.0,"packages":124.0,"pins":116.0,"specified":2.0,"weather":"雨","traffic":"やや混雑","checkin":"2026-11-03T09:00","finish":"2026-11-03T15:45","deliveryStart":"2026-11-03T09:18","redelivery":2.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":22.0,"distance":80.0,"fuel":1050.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-03","planned":360.0,"actual":405.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-003","worker":"DEMO01","station":"東京西B","offer":"2026-11-02T00:00","start":"2026-11-04T13:00","end":"2026-11-04T17:00","pay":8500.0,"premium":"あり","extra":500.0,"packages":82.0,"pins":74.0,"specified":3.0,"weather":"晴れ","traffic":"渋滞なし","checkin":"2026-11-04T12:55","finish":"2026-11-04T16:43","deliveryStart":"2026-11-04T13:13","redelivery":3.0,"returned":3.0,"undelivered":2.0,"exceptionMinutes":29.0,"distance":37.0,"fuel":550.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-04","planned":240.0,"actual":228.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-004","worker":"DEMO01","station":"東京北C","offer":"2026-11-03T00:00","start":"2026-11-05T09:00","end":"2026-11-05T17:00","pay":16800.0,"premium":"なし","extra":0.0,"packages":162.0,"pins":154.0,"specified":4.0,"weather":"曇り","traffic":"非常に混雑","checkin":"2026-11-05T09:00","finish":"2026-11-05T17:51","deliveryStart":"2026-11-05T09:18","redelivery":4.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":36.0,"distance":122.0,"fuel":1550.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-05","planned":480.0,"actual":531.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-005","worker":"DEMO01","station":"東京東A","offer":"2026-11-04T00:00","start":"2026-11-06T09:00","end":"2026-11-06T11:00","pay":4120.0,"premium":"なし","extra":0.0,"packages":39.0,"pins":31.0,"specified":1.0,"weather":"晴れ","traffic":"渋滞なし","checkin":"2026-11-06T09:00","finish":"2026-11-06T11:24","deliveryStart":"2026-11-06T09:13","redelivery":2.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":17.0,"distance":25.0,"fuel":330.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-06","planned":120.0,"actual":144.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-006","worker":"DEMO01","station":"東京北C","offer":"2026-11-06T00:00","start":"2026-11-08T09:00","end":"2026-11-08T13:00","pay":8320.0,"premium":"なし","extra":0.0,"packages":87.0,"pins":79.0,"specified":2.0,"weather":"曇り","traffic":"渋滞なし","checkin":"2026-11-08T08:55","finish":"2026-11-08T12:46","deliveryStart":"2026-11-08T09:13","redelivery":0.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":0,"distance":41.0,"fuel":620.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-08","planned":240.0,"actual":231.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-007","worker":"DEMO01","station":"東京西B","offer":"2026-11-08T00:00","start":"2026-11-10T09:00","end":"2026-11-10T15:00","pay":12300.0,"premium":"あり","extra":500.0,"packages":128.0,"pins":120.0,"specified":3.0,"weather":"雨","traffic":"やや混雑","checkin":"2026-11-10T09:00","finish":"2026-11-10T15:37","deliveryStart":"2026-11-10T09:13","redelivery":1.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":21.0,"distance":75.0,"fuel":1040.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-10","planned":360.0,"actual":397.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-008","worker":"DEMO01","station":"東京北C","offer":"2026-11-10T00:00","start":"2026-11-12T09:00","end":"2026-11-12T17:00","pay":17400.0,"premium":"なし","extra":0.0,"packages":177.0,"pins":169.0,"specified":0.0,"weather":"雨","traffic":"非常に混雑","checkin":"2026-11-12T08:55","finish":"2026-11-12T17:53","deliveryStart":"2026-11-12T09:13","redelivery":2.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":23.0,"distance":117.0,"fuel":1700.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-12","planned":480.0,"actual":538.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-009","worker":"DEMO01","station":"東京東A","offer":"2026-11-12T00:00","start":"2026-11-14T09:00","end":"2026-11-14T13:00","pay":8350.0,"premium":"なし","extra":0.0,"packages":79.0,"pins":71.0,"specified":1.0,"weather":"晴れ","traffic":"渋滞なし","checkin":"2026-11-14T09:00","finish":"2026-11-14T12:44","deliveryStart":"2026-11-14T09:13","redelivery":0.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":0,"distance":38.0,"fuel":510.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-14","planned":240.0,"actual":224.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-010","worker":"DEMO01","station":"東京西B","offer":"2026-11-14T00:00","start":"2026-11-16T09:00","end":"2026-11-16T15:00","pay":12400.0,"premium":"なし","extra":0.0,"packages":132.0,"pins":124.0,"specified":2.0,"weather":"曇り","traffic":"やや混雑","checkin":"2026-11-16T08:55","finish":"2026-11-16T15:38","deliveryStart":"2026-11-16T09:13","redelivery":1.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":27.0,"distance":74.0,"fuel":1120.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-16","planned":360.0,"actual":403.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-011","worker":"DEMO01","station":"東京東A","offer":"2026-11-16T00:00","start":"2026-11-18T09:00","end":"2026-11-18T11:00","pay":4200.0,"premium":"なし","extra":0.0,"packages":42.0,"pins":34.0,"specified":3.0,"weather":"晴れ","traffic":"渋滞なし","checkin":"2026-11-18T09:00","finish":"2026-11-18T11:21","deliveryStart":"2026-11-18T09:13","redelivery":2.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":29.0,"distance":24.0,"fuel":340.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-18","planned":120.0,"actual":141.0,"breaks":0.0,"demo":true,"countUnit":"packages"},{"id":"virtual-block-012","worker":"DEMO01","station":"東京北C","offer":"2026-11-18T00:00","start":"2026-11-20T09:00","end":"2026-11-20T17:00","pay":16900.0,"premium":"あり","extra":600.0,"packages":169.0,"pins":161.0,"specified":0.0,"weather":"雨","traffic":"やや混雑","checkin":"2026-11-20T08:55","finish":"2026-11-20T17:47","deliveryStart":"2026-11-20T09:13","redelivery":0.0,"returned":0.0,"undelivered":0.0,"exceptionMinutes":0,"distance":109.0,"fuel":1540.0,"pressure":"","reason":"","exceptionReason":"","breakMins":0.0,"date":"2026-11-20","planned":480.0,"actual":532.0,"breaks":0.0,"demo":true,"countUnit":"packages"}];
+records=initialPreviewData.map(r=>derive(r));
+showDemo=true;
+const previewSelect=$('previewBlockSelect');
+// ブロック記録では代表的な1件のみ表示し、集計には12件を使用する。
+// Show actual pre-populated block form, not just the dashboard.
+editRecord(records[0].id);
+
+</script></body></html>
